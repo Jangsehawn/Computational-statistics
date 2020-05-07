@@ -1,0 +1,69 @@
+install.packages("RnavGraphImageData")
+library(RnavGraphImageData)
+
+data(faces)
+
+fa1<-matrix(faces[,1],64,64)
+fa1<-t(fa1)[,64:1] ##90 degree rotation
+
+image(fa1,col  = gray((0:255)/255))
+
+op<-par(mfrow=c(2,2))
+image(t(matrix(faces[,1],64,64))[,64:1],col  = gray((0:255)/255))
+image(t(matrix(faces[,10],64,64))[,64:1],col  = gray((0:255)/255))
+image(t(matrix(faces[,31],64,64))[,64:1],col  = gray((0:255)/255))
+image(t(matrix(faces[,50],64,64))[,64:1],col  = gray((0:255)/255))
+par(op)
+
+
+###############################################################
+### faces : 4096 * 400 matrix
+
+pcares<-prcomp(t(faces)) ## Note that columns are centered in prcomp !
+
+#pcares$rotation ## loading matrix 4096 * 400
+#pcares$x ## PC score matrix 400 * 400
+
+names(pcares)
+
+pcares$rotation[1:10,1:10]
+
+pcares$x[1:10,1:10]
+
+screeplot(pcares)
+
+### Look at the followings.
+
+cbind(scale(t(faces),scale=FALSE)%*%pcares$rotation[,1],pcares$x[,1])
+
+plot(pcares$x[,1:2],cex=0)
+text(pcares$x[1,], pcares$x[2,], labels=1:400, cex= 0.7)
+
+biplot(pcares)
+
+######################################################
+## To see the face changes along the first PC direction.
+
+mean.image<-apply(t(faces),2,mean)
+lam<-pcares$sdev
+
+kk<-1 ## try 2, 3
+op<-par(mfrow=c(1,5))
+im1<-t(matrix(mean.image-100*sqrt(lam[kk])*pcares$rotation[,kk],64,64))[,64:1]
+image(im1,col  = gray((0:255)/255))
+
+im2<-t(matrix(mean.image-50*sqrt(lam[kk])*pcares$rotation[,kk],64,64))[,64:1]
+image(im2,col  = gray((0:255)/255))
+
+im3<-t(matrix(mean.image-0*sqrt(lam[kk])*pcares$rotation[,kk],64,64))[,64:1]
+image(im3,col  = gray((0:255)/255))
+
+im4<-t(matrix(mean.image+50*sqrt(lam[kk])*pcares$rotation[,kk],64,64))[,64:1]
+image(im4,col  = gray((0:255)/255))
+
+im5<-t(matrix(mean.image+100*sqrt(lam[kk])*pcares$rotation[,kk],64,64))[,64:1]
+image(im5,col  = gray((0:255)/255))
+par(op)
+
+
+################################1
