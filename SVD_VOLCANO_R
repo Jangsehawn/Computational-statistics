@@ -1,0 +1,64 @@
+## SVD
+
+X<-matrix(c(1,2,3,4,5,6),3,2)
+res<-svd(X)
+res
+
+res$u%*% diag(res$d)%*% t(res$v)
+
+
+res$d[1]*res$u[,1]%*%t(res$v[,1])
+
+res$d[2]*res$u[,2]%*%t(res$v[,2])
+
+
+## some simple examples for svd (example: volcano data)
+
+# A display of the volcano
+x11()
+x <- 10*(1:nrow(volcano))
+y <- 10*(1:ncol(volcano))
+image(x, y, volcano, col = terrain.colors(100), axes = FALSE)
+contour(x, y, volcano, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+
+volcano2<-volcano+matrix(rnorm(87*61,0,3),87,61)
+
+
+op<-par(mfrow=c(1,2))
+image(x, y, volcano, col = terrain.colors(100), axes = FALSE)
+contour(x, y, volcano, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+
+image(x, y, volcano2, col = terrain.colors(100), axes = FALSE)
+contour(x, y, volcano2, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+par(op)
+
+
+res<-svd(volcano2)
+
+vol_r1<-res$d[1]*res$u[,1]%*%t(res$v[,1])
+vol_r1
+vol_r2<-res$d[1]*res$u[,1]%*%t(res$v[,1])+res$d[2]*res$u[,2]%*%t(res$v[,2])
+vol_r3<-res$d[1]*res$u[,1]%*%t(res$v[,1])+res$d[2]*res$u[,2]%*%t(res$v[,2])+res$d[3]*res$u[,3]%*%t(res$v[,3])
+vol_r4<-res$d[1]*res$u[,1]%*%t(res$v[,1])+res$d[2]*res$u[,2]%*%t(res$v[,2])+res$d[3]*res$u[,3]%*%t(res$v[,3])+res$d[4]*res$u[,4]%*%t(res$v[,4])
+
+
+image(x, y, vol_r1, col = terrain.colors(100), axes = FALSE)
+contour(x, y, vol_r1, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+
+image(x, y, vol_r2, col = terrain.colors(100), axes = FALSE)
+contour(x, y, vol_r2, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+
+op<-par(mfrow=c(1,2))
+image(x, y, volcano, col = terrain.colors(100), axes = FALSE)
+contour(x, y, volcano, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+
+image(x, y, vol_r4, col = terrain.colors(100), axes = FALSE)
+contour(x, y, vol_r4, levels = seq(90, 200, by = 5),
+        add = TRUE, col = "peru")
+par(op)
