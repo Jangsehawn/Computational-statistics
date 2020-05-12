@@ -1,0 +1,39 @@
+.libPaths('E:/R')
+install.packages("SparseM")
+library(SparseM)
+
+#A : a symmetric PD matrix
+#b : a given vector
+# solve Ax=b
+
+n<-1000
+
+
+L<-matrix(rnorm(n^2),n,n)
+L[abs(L)<3]<-0
+diag(L)<-1
+sum(L!=0)
+
+start.time<-proc.time()
+A<-L%*%t(L)
+proc.time()-start.time
+
+L.csr<-as.matrix.csr(L)
+start.time<-proc.time()
+A.csr<-L.csr%*%t(L.csr)
+proc.time()-start.time
+
+#########################
+
+b<-rnorm(n)
+
+start.time<-proc.time()
+c<-solve(A,b)
+proc.time()-start.time
+
+
+
+start.time<-proc.time()
+d<-solve(A.csr,b)
+proc.time()-start.time
+# 진짜 빠르고 간단하니깐 꼭 쓰자!!
