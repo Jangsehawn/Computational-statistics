@@ -1,0 +1,112 @@
+### optimize: one-dimensional minimization
+#### Example: optimize
+f1 <- function(x){
+  return <- (x-2)^2
+}
+f1(2)
+
+curve(f1,-2,5)
+
+optimize(f=f1,interval=c(-10,10))
+
+#### Example 2: optimize
+
+f2 <- function(x){
+  return <- -exp(-x^2)*(x-2)^2
+}
+
+curve(f2,-2,5)
+
+optimize(f=f2,interval=c(-10,10))
+
+#### Example 3: optimize
+
+f3 <- function(x){
+  return <- -abs(sin(x))*exp(-x^2)*(x-2)^2
+}
+
+curve(f3,-2,5)
+
+optimize(f=f3,interval=c(-5,0))
+
+optimize(f=f3,interval=c(0,2))
+
+optimize(f=f3,interval=c(-10,10))
+#########
+?optim
+#optim(par, fn, gr = NULL, …,
+#      method = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
+#                 "Brent"),
+#      lower = -Inf, upper = Inf,
+#      control = list(), hessian = FALSE)
+#Method "BFGS" is a quasi-Newton method (also known as a variable metric algorithm), specifically that published simultaneously in 1970 by Broyden, Fletcher, Goldfarb and Shanno. This uses function values and gradients to build up a picture of the surface to be optimized.
+
+#Method "CG" is a conjugate gradients method based on that by Fletcher and Reeves (1964) (but with the option of Polak--Ribiere or Beale--Sorenson updates). Conjugate gradient methods will generally be more fragile than the BFGS method, but as they do not store a matrix they may be successful in much larger optimization problems.
+
+#Method "L-BFGS-B" is that of Byrd et. al. (1995) which allows box constraints, that is each variable can be given a lower and/or upper bound. The initial value must satisfy the constraints. This uses a limited-memory modification of the BFGS quasi-Newton method. If non-trivial bounds are supplied, this method will be selected, with a warning.
+
+#Nocedal and Wright (1999) is a comprehensive reference for the previous three methods.
+
+#Method "SANN" is by default a variant of simulated annealing given in Belisle (1992). Simulated-annealing belongs to the class of stochastic global optimization methods. It uses only function values but is relatively slow. It will also work for non-differentiable functions. This implementation uses the Metropolis function for the acceptance probability. By default the next candidate point is generated from a Gaussian Markov kernel with scale proportional to the actual temperature. If a function to generate a new candidate point is given, method "SANN" can also be used to solve combinatorial optimization problems. Temperatures are decreased according to the logarithmic cooling schedule as given in Belisle (1992, p.890); specifically, the temperature is set to temp / log(((t-1) %/% tmax)*tmax + exp(1)), where t is the current iteration step and temp and tmax are specifiable via control, see below. Note that the "SANN" method depends critically on the settings of the control parameters. It is not a general-purpose method but can be very useful in getting to a good value on a very rough surface.
+
+#Method "Brent" is for one-dimensional problems only, using optimize(). It can be useful in cases where optim() is used inside other functions where only method can be specified, such as in mle from package stats4.
+
+########
+
+
+#### Example 1: NR algorithm
+f1 <- function(x){
+  return <- (x-2)^2
+}
+
+Df1<- function(x){
+  return<-2*(x-2)
+}
+
+D2f1<-function(x){
+  return<-2
+}
+
+xx<-0.1
+for (i in 1:10){
+  xx<-xx-  Df1(xx)/D2f1(xx)
+  print(xx)
+}
+
+
+#### Example 2: NR algorithm (2 variables)
+
+f1 <- function(x){
+  return <- (x[1]-2)^2+(x[2]-1)^2
+}
+
+Df1<- function(x){
+  return<-c(2*(x[1]-2),2*(x[2]-1))
+}
+
+D2f1<-function(x){
+  return<-(matrix(c(2,0,0,2),2,2))
+}
+
+xx<-c(0,0)
+for (i in 1:10){
+  xx<-xx-solve(D2f1(xx))%*%Df1(xx)
+  print(xx)
+}
+
+
+#### Example 1: optim (BFGS algorithm)
+f1 <- function(x){
+  return <- (x-2)^2
+}
+
+optim(par=0, f1, method = "BFGS")
+
+
+#### Example 2: optim (BFGS algorithm)
+f1 <- function(x){
+  return <- (x[1]-2)^2+(x[2]-1)^2
+}
+
+
+optim(par=c(0,0), f1, method = "BFGS")
