@@ -1,0 +1,193 @@
+#### Estimating pi
+set.seed(1234)
+n<-100000
+x<-runif(n,0,1)
+y<-runif(n,0,1)
+
+dist.r<-function(x,y){
+	r<-sqrt((x-0.5)^2+(y-0.5)^2)
+	return(r)
+}
+
+rr<-dist.r(x,y)
+4*sum(rr<=0.5)/n
+
+#### Estimating int_{-2}^{1} phi(x)dx
+
+set.seed(1234)
+n<-100000
+x<-rnorm(n,0,1)
+
+
+sum((x>=-2)*(x<=1))/n
+ 
+pnorm(1)-pnorm(-2)
+
+
+###  F(X) follows uniform distn)
+
+set.seed(1234)
+x<-rexp(10000,rate=1) #### f(x)=rate*exp(-rate*x)
+
+cdfexp1<-function(x){
+	1-exp(-x)
+}
+
+hist(cdfexp1(x))
+
+### Inverse method
+
+gexp1<-function(n){
+	u<-runif(n,0,1)
+	x=-log(1-u)
+	return(x)
+}
+
+set.seed(1234)
+res<-gexp1(100000)
+hist(res)
+xx<-seq(0,10,length=1000)
+lines(xx,100000*dexp(xx),type="l",col="red")
+
+
+##################################################
+beta23<-function(x){
+	12*x*(1-x)^2
+}
+
+xx<-seq(0,1,length=1000)
+plot(xx,beta23(xx),ylab="f(x)",xlab="x")
+
+
+min(beta23(xx)) ## 0
+max(beta23(xx)) ## 1.7777 ~ 1.8
+##################################################
+set.seed(1234)
+n<-10000
+
+x<-runif(n,0,1)
+u<-runif(n,0,1)
+rej<-as.numeric(beta23(x)/1.8<u)
+
+x.OK<-x[which(rej==0)]
+
+plot(density(x.OK))
+lines(xx,beta23(xx),ylab="f(x)",xlab="x",col="red")
+
+######################################################
+### we do not need to have the proportionality constant.
+beta00<-function(x){
+	x*(1-x)^2
+}
+
+xx<-seq(0,1,length=1000)
+plot(xx,beta00(xx),ylab="f(x)",xlab="x") ### max<0.16
+
+set.seed(1234)
+n<-10000
+
+x<-runif(n,0,1)
+u<-runif(n,0,1)
+rej<-as.numeric(beta00(x)/0.16<u)
+
+x.OK<-x[which(rej==0)]
+
+plot(density(x.OK))
+lines(xx,beta23(xx),ylab="f(x)",xlab="x",col="red")
+
+######################################################
+
+op<-par(mfrow=c(1,2))
+plot(xx,beta23(xx),ylab="f(x)",xlab="x")
+plot(xx,beta23(xx),ylab="f(x)",xlab="x",ylim=c(0,5))
+par(op)
+
+
+##################################################
+### Rejection sampling: bivariate distribution
+
+fxy<-function(x,y){
+	x+y
+}
+
+
+n<-100
+x<-seq(0,1,length=n)
+y<-seq(0,1,length=n)
+z<-outer(x,y,FUN=fxy)
+persp(x,y,z)
+
+##################################################
+xx<-seq(0,1,length=1000)
+
+set.seed(1234)
+n<-100000
+
+x<-runif(n,0,1)
+y<-runif(n,0,1)
+u<-runif(n,0,1)
+rej<-as.numeric(fxy(x,y)/2<u)
+
+x.OK<-x[which(rej==0)]
+y.OK<-y[which(rej==0)]
+
+op<-par(mfrow=c(1,2))
+require(MASS)
+persp(kde2d(x.OK,y.OK),add=TRUE)
+
+n<-100
+x<-seq(0,1,length=n)
+y<-seq(0,1,length=n)
+z<-outer(x,y,FUN=fxy)
+persp(x,y,z)
+par(op)
+
+#################################################
+### SIR I
+### f(target)=Normal , g(x)=Cauchy
+
+set.seed(1234)
+
+SW<-function(x){
+	ff<-dnorm(x)
+	gg<-dcauchy(x)
+	weight<-(ff/gg)/sum(ff/gg)
+	return(weight)
+}
+
+m<-10000
+n<-100
+
+xcau<-rcauchy(m,location=0,scale=1)
+ww<-SW(xcau)
+x<-sample(xcau,size=n,replace=TRUE,prob=ww)
+
+hist(x,probability=TRUE,xlim=c(-5,5))
+xx<-seq(-5,5,length=100)
+lines(xx,dnorm(xx),type="l",col="red")
+
+
+### SIR II
+### f(target)=Cauchy , g(x)=Normal
+
+
+
+set.seed(1234)
+
+SW<-function(x){
+	ff<-dcauchy(x)
+	gg<-dnorm(x)
+	weight<-(ff/gg)/sum(ff/gg)
+	return(weight)
+}
+
+m<-10000
+n<-100
+
+xnorm<-rnorm(m,0,1)
+ww<-SW(xnorm)
+x<-sample(xnorm,size=n,replace=TRUE,prob=ww)
+
+hist(x,probability=TRUE,xlim=c(-7,7))
+xx<-seq(-5,5,length=100)
+lines(xx,dcauchy(xx),type="l",col="red")
