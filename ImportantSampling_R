@@ -1,0 +1,74 @@
+#### MC approach I
+#### P(X>1.9) where X follows Cauchy(0,1)
+#### true value = 0.15-atan(1.9)/pi = 0.1542
+
+cau19<-function(n){
+	x<-rcauchy(n,0,1)
+	prob<-mean((x>1.9))
+	return(prob)
+}
+
+set.seed(12345)
+
+cau19(1000)
+
+cau19(10000)
+
+cau19(100000)
+
+#### The same problem, but we are using importance sampling
+
+imp19<-function(n){
+	x<-1.9/runif(n,0,1)
+	prob<-mean((x>1.9)*(1/(pi*(1+x^2)))/(1.9/x^2))
+	return(prob)
+}
+
+
+set.seed(12345)
+
+imp19(1000)
+
+imp19(10000)
+
+imp19(100000)
+
+
+
+############ Comparison between MC I and importance sampling
+set.seed(789)
+grid<-seq(1,1000)
+
+pr_cau19<-rep(0,1000)
+pr_imp19<-rep(0,1000)
+for (i in grid){
+	pr_cau19[i]<-cau19(i)
+	pr_imp19[i]<-imp19(i)
+}
+
+plot(grid,pr_cau19,type="l",ylab="estimate")
+lines(grid,pr_imp19,col="red")
+
+
+
+####### Additional example: estimating a tail probability
+
+### P(X>4) where X follows N(0,1)
+
+(1-pnorm(4))*100
+
+### ordinary MC estimator
+
+x<-rnorm(1000)
+mean(x>4)*100
+
+### importance sampling 1
+
+x<-rnorm(1000,4,1)
+mean((x>4)*dnorm(x)/dnorm(x,4,1))*100
+
+
+### importance sampling 2
+
+x<-rexp(1000,1)+4
+mean((x>4)*dnorm(x)/exp(-(x-4)))*100
