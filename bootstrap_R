@@ -1,0 +1,164 @@
+### Example: calculating se for median
+set.seed(1201)
+data<-rnorm(100,5,3)
+
+B<-1000
+b.samples<-lapply(1:B,function(i) sample(data,replace=T))
+b.median<-sapply(b.samples,median)
+
+
+hist(b.median)
+
+sqrt(var(b.median))
+
+## in theory,
+## p*(1-p)/(n*f(5)^2)=1/(100*4*f(5)^2)=0.1414  (f(5)=dnorm(0,0,3))
+## sqrt(0.1414)=0.376
+
+
+
+## 49 populations of U.S. cities (1000's) 
+## 49 are random samples from 196 largest cities in 1920.
+## first column: pop in 1920, second column: pop in 1930
+
+library(boot)
+data(bigcity) 
+
+## we want to know the mean ratio of the populations,
+## i.e. pop 1930/pop 1920
+
+row.bigcity<-dim(bigcity)[1]
+
+boots.bigcity<-function(index){
+	b.bigcity<-bigcity[index,]
+	b.ratio<-sum(b.bigcity$x)/sum(b.bigcity$u)
+	return(b.ratio)
+}
+
+B<-1000
+b.samples<-lapply(1:B,function(i) sample(c(1:row.bigcity),replace=T))
+b.ratio<-sapply(b.samples,boots.bigcity)
+
+hist(b.ratio)
+
+sqrt(var(b.ratio))
+
+## Normal based confidence interval
+
+boots.bigcity(c(1:49))+1.96*sqrt(var(b.ratio))
+boots.bigcity(c(1:49))-1.96*sqrt(var(b.ratio))
+
+
+#### As an alternative, you may use "boot".
+#### Before calling boot,
+#### you need to define a function that will return the statistic
+#### that you want to bootstrap.
+
+library(boot)
+# Usual bootstrap of the ratio of means using the city data
+ratio <- function(d, w) sum(d$x * w)/sum(d$u * w)
+look <- function(d,i) {
+  print(i)
+  return(runif(1))
+}
+Res.city<-boot(bigcity, look, R = 3, stype = "w")
+
+
+RES.city<-boot(bigcity, ratio, R = 999, stype = "w")
+boot.ci(RES.city)
+### Example: calculating se for median
+set.seed(1201)
+data<-rnorm(100,5,3)
+
+B<-1000
+b.samples<-lapply(1:B,function(i) sample(data,replace=T))
+b.median<-sapply(b.samples,median)
+
+
+hist(b.median)
+
+sqrt(var(b.median))
+
+### normal interval
+c(mean(b.median)-2*sqrt(var(b.median)),mean(b.median)+2*sqrt(var(b.median)))
+
+### percentile interval
+c(quantile(b.median,0.025),quantile(b.median,0.975))
+
+### basic interval
+c(2*median(data)-quantile(b.median,0.975),2*median(data)-quantile(b.median,0.025))
+
+
+##############################################################################################
+############### Regression
+##############################################################################################
+
+age=18:29
+height=c(76.1,77,78.1,78.2,78.8,79.7,79.9,81.1,81.2,81.8,82.8,83.5)
+
+lm.res<- lm(height ~ age)
+
+plot(age,height)
+abline(lm.res)
+
+boots.pair<-function(index){
+	b.age<-age[index]
+	b.height<-height[index]
+	b.coeff<-coef(lm(b.height~b.age))[2]
+	return(b.coeff)
+}
+
+B<-1000
+set.seed(1210)
+b.samples<-lapply(1:B,function(i) sample(c(1:length(height)),replace=T))
+b.PWD<-sapply(b.samples,boots.pair)
+
+mean(b.PWD)
+sd(b.PWD)
+summary(lm.res) ### for comparison
+
+#######################################
+boot.ex1<-function(data,index){
+	bdata<-data[index,]
+	bcoeff<-coef(lm(bdata[,1]~bdata[,2]))[2]
+	return(bcoeff)
+}
+
+library(boot)
+data.attr<-cbind(height,age)
+res.bootex1<-boot(data.attr,boot.ex1,999)
+
+boot.ci(res.bootex1,type=c("norm","perc","bca"))
+
+############################################################################
+lm.res<- lm(height ~ age)
+residual<-resid(lm.res)
+fit<-fitted(lm.res)
+
+boots.resid<-function(index){
+	newy<-fit+residual[index]
+	b.coeff<-coef(lm(newy~age))[2]
+	return(b.coeff)
+}
+
+B<-1000
+set.seed(1210)
+b.samples<-lapply(1:B,function(i) sample(c(1:length(height)),replace=T))
+b.PWD<-sapply(b.samples,boots.resid)
+
+mean(b.PWD)
+sd(b.PWD)
+summary(lm.res) ### for comparison
+
+############################################################################
+boot.ex2<-function(data,index){
+	newy<-fit+residual[index]
+	bcoeff<-coef(lm(newy~age))[2]
+	return(bcoeff)
+}
+
+library(boot)
+data.attr<-cbind(height,age)
+res.bootex2<-boot(data.attr,boot.ex2,999)
+
+boot.ci(res.bootex2,type=c("norm","perc","bca"))
