@@ -1,0 +1,48 @@
+##### Iteration
+
+x<-matrix(c(0.6,0.4),1,2)
+A<-matrix(c(0.95,0.03,0.05,0.97),2,2)
+
+for (i in 1:100){
+	x<-x%*%A
+	print(x)
+}
+
+
+#### Sampling method
+
+
+uu<-as.numeric(runif(1)>0.6)+1
+
+A<-matrix(c(0.95,0.03,0.05,0.97),2,2)
+
+rr<-rep(0,100000)
+
+for (i in 1:100000){
+        
+	if (uu==1) {uu<-as.numeric(runif(1)>0.95)+1 }
+	if (uu==2) {uu<-as.numeric(runif(1)>0.03)+1 }
+
+	rr[i]<-uu
+}
+
+table(rr)/100000
+
+
+#### Using the spectral decimposition
+
+U<-eigen(A)$vectors
+eigen(A)$values
+
+U%*%matrix(c(1,0,0,0),2,2)%*%solve(U)
+
+
+### When the starting vector is the stationary vector
+
+x<-matrix(c(0.375,0.625),1,2)
+A<-matrix(c(0.95,0.03,0.05,0.97),2,2)
+
+for (i in 1:100){
+	x<-x%*%A
+	print(x)
+}
