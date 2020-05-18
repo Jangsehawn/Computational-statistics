@@ -1,0 +1,66 @@
+## Lady tea testing
+
+set.seed(1234)
+
+true<-c("T","M","M","T","T","M","T","M")
+answer<-c("T","M","M","M","T","M","T","T")
+
+sum(true[c(1,4,5,7)]==answer[c(1,4,5,7)])
+
+correct<-rep(0,10000)
+
+for (i in 1:10000){
+
+	p.answer<-sample(answer,replace=F)
+	correct[i]<-sum(true[c(1,4,5,7)]==p.answer[c(1,4,5,7)])
+}
+
+table(correct)/10000
+
+
+## t-test vs permutation test
+
+set.seed(1234)
+
+x<-rnorm(10)
+y<-rnorm(10,2,1)
+
+t.test(x,y)
+
+z<-c(x,y)
+perm.t<-rep(0,10000)
+
+for (i in 1:10000){
+	perm.z<-sample(z,replace=F)
+	perm.x<-perm.z[1:10]
+	perm.y<-perm.z[-(1:10)]
+	perm.t[i]<-t.test(perm.x,perm.y)$statistic
+}
+
+hist(perm.t)
+abline(v=t.test(x,y)$statistic,col="red")
+
+mean(abs(t.test(x,y)$statistic)< abs(perm.t))
+
+
+### regression case
+
+dim(faithful)
+plot(eruptions~waiting,data=faithful)
+
+
+x<-faithful$waiting
+y<-faithful$eruptions
+
+summary(lm(y~x))
+
+perm.test<-rep(0,1000)
+for (i in 1:1000){
+	perm.y<-sample(y,replace=F)
+	perm.test[i]<-lm(perm.y~x)$coef[2]
+}
+
+hist(perm.test,xlim=c(-0.1,0.1))
+abline(v=lm(y~x)$coef[2],col="red")
+
+mean(abs(lm(y~x)$coef[2])< abs(perm.test)
